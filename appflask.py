@@ -13,7 +13,26 @@ from flask import Flask, request, make_response, abort, redirect
 
 app = Flask(__name__)
 
-# Rota da página inicial
+# Função auxiliar para criar o botão de voltar
+def back_button():
+    return '''
+        <div style="margin-top: 20px;">
+            <a href="/" style="
+                display: inline-block;
+                text-decoration: none;
+                background: #1976d2;
+                color: white;
+                padding: 10px 16px;
+                border-radius: 8px;
+                font-weight: 500;
+                box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
+                transition: background 0.2s;">
+                ⬅ Voltar ao Início
+            </a>
+        </div>
+    '''
+
+# Página inicial
 @app.route('/')
 def hello_world():
     return '''
@@ -34,15 +53,11 @@ def hello_world():
                 border-radius: 12px;
                 box-shadow: 0 4px 24px rgba(0,0,0,0.08);
                 padding: 32px 24px;
+                text-align: center;
             }
-            h1 {
+            h1, h2 {
                 color: black;
-                margin-bottom: 0.5em;
-            }
-            h2 {
-                color: black;
-                margin-top: 0;
-                margin-bottom: 1.5em;
+                margin: 0 0 1em;
             }
             ul {
                 list-style: none;
@@ -69,8 +84,8 @@ def hello_world():
     </head>
     <body>
         <div class="container">
-            <h1>Hello World!</h1>
-            <h2>Disciplina PTBDSWS</h2>
+            <h1>Disciplina PTBDSWS</h1>
+            <h2>Lucca Zovedi</h2>
             <ul>
                 <li><a href="/user/Zovedi">Cumprimentar usuário</a></li>
                 <li><a href="/request">Exibir User-Agent</a></li>
@@ -78,41 +93,71 @@ def hello_world():
                 <li><a href="/badrequest">Requisição inválida (400)</a></li>
                 <li><a href="/error">Erro 404</a></li>
                 <li><a href="/redirect">Redirecionar para IFSP</a></li>
+                <li><a href="/user/identify/Zovedi/PT3039463/IFSP">Identificação</a></li>
+                <li><a href="/inforequest">IP Request</a></li>
             </ul>
         </div>
     </body>
     </html>
     '''
 
-# Rota para cumprimentar o usuário pelo nome
+# Cumprimentar usuário
 @app.route('/user/<name>')
-def user(name):
-    return '<h1>Hello, {}!</h1>'.format(name)
+def greet_user(name):
+    return f'<h1>Hello, {name}!</h1>' + back_button()
 
-# Rota para exibir o cabeçalho User-Agent da requisição
+# Exibir cabeçalho User-Agent
 @app.route('/request')
 def console():
-    console = request.headers.get('User-Agent')
-    return console
+    user_agent = request.headers.get('User-Agent')
+    return f'<h1>User-Agent:</h1><p>{user_agent}</p>' + back_button()
 
-# Rota para requisições inválidas
+# Requisições inválidas
 @app.route('/badrequest')
 def bad_request():
-    abort(400)
+    return '<h1>Erro 400 - Requisição Inválida</h1>' + back_button(), 400
 
-# Rota para retornar com uma resposta personalizada e um cookie
+# Resposta personalizada e cookie
 @app.route('/response')
 def cookie():
-    cookie = make_response('<i>This document carries a cookie!<i>')
-    cookie.set_cookie('answer', '404')
-    return cookie
+    response = make_response('<i>This document carries a cookie!</i>' + back_button())
+    response.set_cookie('answer', '404')
+    return response
 
-# Rota de redirecionamento
+# Redirecionamento
 @app.route('/redirect')
 def redirect_user():
     return redirect('https://ptb.ifsp.edu.br')
 
-# Rota para retornar erro 404
+# Erro 404
 @app.route('/error')
 def error():
-    abort(404)
+    return '<h1>Erro 404 - Página não encontrada</h1>' + back_button(), 404
+
+# Identificação do usuário
+@app.route('/user/identify/<name>/<user_id>/<institute>')
+def identify_user(name, user_id, institute):
+    return f'''
+        <h1>Avaliação contínua Aula 030!</h1>
+        <h2>Aluno: {name}</h2>
+        <h2>Prontuário: {user_id}</h2>
+        <h2>Instituição: {institute}</h2>
+    ''' + back_button()
+
+# Info do Request
+@app.route('/inforequest')
+def console1():
+    user_agent = request.headers.get('User-Agent')
+    ip = request.remote_addr
+    host = request.host
+    return f'''
+        <h1>Informações do Usuário</h1>
+        <h2>IP: {ip}</h2>
+        <h2>Navegador: {user_agent}</h2>
+        <h2>Host: {host}</h2>
+    ''' + back_button()
+
+# Executar
+if __name__ == '__main__':
+    app.run(debug=True)
+
